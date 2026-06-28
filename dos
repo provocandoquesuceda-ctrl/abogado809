@@ -1,0 +1,46 @@
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
+export function formatCiudad(ciudad: string): string {
+  const map: Record<string, string> = {
+    SANTO_DOMINGO: 'Santo Domingo',
+    SANTIAGO: 'Santiago',
+    SAN_PEDRO: 'San Pedro de Macorís',
+    LA_ROMANA: 'La Romana',
+    PUERTO_PLATA: 'Puerto Plata',
+    HIGÜEY: 'Higüey',
+    MOCA: 'Moca',
+    BANI: 'Baní',
+    OTRA: 'Otra ciudad',
+  }
+  return map[ciudad] ?? ciudad
+}
+
+export function formatWhatsApp(numero: string, nombre: string): string {
+  const msg = encodeURIComponent(
+    `Hola ${nombre}, vi su perfil en Abogado809 y me gustaría solicitar una consulta legal.`
+  )
+  const clean = numero.replace(/\D/g, '')
+  return `https://wa.me/${clean}?text=${msg}`
+}
+
+export function calcularRating(resenas: { rating: number }[]): number {
+  if (!resenas.length) return 0
+  const sum = resenas.reduce((acc, r) => acc + r.rating, 0)
+  return Math.round((sum / resenas.length) * 10) / 10
+}
