@@ -1,0 +1,174 @@
+import { PrismaClient, Ciudad, Plan, Role } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
+const prisma = new PrismaClient()
+
+async function main() {
+  console.log('🌱 Iniciando seed...')
+
+  // Especialidades
+  const especialidades = [
+    { nombre: 'Derecho Penal',        slug: 'penal',       icono: '⚖️' },
+    { nombre: 'Derecho Civil',         slug: 'civil',       icono: '📋' },
+    { nombre: 'Derecho Laboral',       slug: 'laboral',     icono: '👷' },
+    { nombre: 'Derecho de Familia',    slug: 'familia',     icono: '👨‍👩‍👧' },
+    { nombre: 'Derecho Corporativo',   slug: 'corporativo', icono: '🏢' },
+    { nombre: 'Derecho Inmobiliario',  slug: 'inmobiliario',icono: '🏠' },
+    { nombre: 'Derecho Migratorio',    slug: 'migratorio',  icono: '🌍' },
+    { nombre: 'Derecho Bancario',      slug: 'bancario',    icono: '🏦' },
+  ]
+
+  for (const esp of especialidades) {
+    await prisma.especialidad.upsert({
+      where: { slug: esp.slug },
+      update: {},
+      create: esp,
+    })
+  }
+  console.log('✓ Especialidades creadas')
+
+  // Admin
+  const adminPass = await bcrypt.hash('admin123456', 12)
+  await prisma.user.upsert({
+    where: { email: 'admin@abogado809.com' },
+    update: {},
+    create: {
+      email: 'admin@abogado809.com',
+      password: adminPass,
+      name: 'Administrador',
+      role: Role.ADMIN,
+    },
+  })
+  console.log('✓ Admin creado')
+
+  // Abogado 1
+  const pass1 = await bcrypt.hash('password123', 12)
+  const user1 = await prisma.user.upsert({
+    where: { email: 'juan.perez@ejemplo.com' },
+    update: {},
+    create: {
+      email: 'juan.perez@ejemplo.com',
+      password: pass1,
+      name: 'Juan Pérez Sánchez',
+      role: Role.ABOGADO,
+    },
+  })
+  await prisma.abogadoPerfil.upsert({
+    where: { userId: user1.id },
+    update: {},
+    create: {
+      userId: user1.id,
+      slug: 'juan-perez-sanchez',
+      titulo: 'Dr.',
+      nombre: 'Juan',
+      apellidos: 'Pérez Sánchez',
+      descripcion: 'Abogado con más de 15 años de experiencia en derecho penal y civil. Egresado de la UASD con diplomado en derecho procesal penal. He representado a cientos de clientes en casos complejos ante los tribunales de la República Dominicana, con un enfoque en la defensa efectiva de los derechos fundamentales de mis clientes.',
+      whatsapp: '18095550001',
+      emailPublico: 'juan.perez@ejemplo.com',
+      ciudad: Ciudad.SANTO_DOMINGO,
+      direccion: 'Av. Abraham Lincoln #456, Piantini, Santo Domingo',
+      universidad: 'Universidad Autónoma de Santo Domingo (UASD)',
+      anioGraduacion: 2008,
+      exequatur: '12345',
+      verificado: true,
+      plan: Plan.PREMIUM,
+      visitas: 342,
+      especialidades: {
+        connect: [{ slug: 'penal' }, { slug: 'civil' }],
+      },
+      experiencias: {
+        create: [
+          { cargo: 'Abogado Litigante', empresa: 'Pérez & Asociados', desde: 2012, actual: true },
+          { cargo: 'Defensor Público', empresa: 'Ministerio Público RD', desde: 2008, hasta: 2012 },
+        ],
+      },
+    },
+  })
+
+  // Abogado 2
+  const pass2 = await bcrypt.hash('password123', 12)
+  const user2 = await prisma.user.upsert({
+    where: { email: 'maria.rodriguez@ejemplo.com' },
+    update: {},
+    create: {
+      email: 'maria.rodriguez@ejemplo.com',
+      password: pass2,
+      name: 'María Rodríguez Gómez',
+      role: Role.ABOGADO,
+    },
+  })
+  await prisma.abogadoPerfil.upsert({
+    where: { userId: user2.id },
+    update: {},
+    create: {
+      userId: user2.id,
+      slug: 'maria-rodriguez-gomez',
+      titulo: 'Lic.',
+      nombre: 'María',
+      apellidos: 'Rodríguez Gómez',
+      descripcion: 'Especialista en derecho de familia e inmobiliario con 10 años de trayectoria. Experta en procesos de divorcio, custodia de menores, partición de bienes y transacciones inmobiliarias. Brindo un servicio personalizado y humano a cada cliente en momentos difíciles.',
+      whatsapp: '18295550002',
+      emailPublico: 'maria.rodriguez@ejemplo.com',
+      ciudad: Ciudad.SANTIAGO,
+      universidad: 'Pontificia Universidad Católica Madre y Maestra (PUCMM)',
+      anioGraduacion: 2013,
+      exequatur: '23456',
+      verificado: true,
+      plan: Plan.PREMIUM,
+      visitas: 218,
+      especialidades: {
+        connect: [{ slug: 'familia' }, { slug: 'inmobiliario' }],
+      },
+      experiencias: {
+        create: [
+          { cargo: 'Abogada Independiente', empresa: 'Consultoría Rodríguez', desde: 2016, actual: true },
+          { cargo: 'Asociada', empresa: 'Bufete Gómez & Familia', desde: 2013, hasta: 2016 },
+        ],
+      },
+    },
+  })
+
+  // Abogado 3
+  const pass3 = await bcrypt.hash('password123', 12)
+  const user3 = await prisma.user.upsert({
+    where: { email: 'carlos.mejia@ejemplo.com' },
+    update: {},
+    create: {
+      email: 'carlos.mejia@ejemplo.com',
+      password: pass3,
+      name: 'Carlos Mejía Torres',
+      role: Role.ABOGADO,
+    },
+  })
+  await prisma.abogadoPerfil.upsert({
+    where: { userId: user3.id },
+    update: {},
+    create: {
+      userId: user3.id,
+      slug: 'carlos-mejia-torres',
+      titulo: 'Lic.',
+      nombre: 'Carlos',
+      apellidos: 'Mejía Torres',
+      descripcion: 'Asesor legal corporativo y especialista en derecho laboral. Apoyo a empresas nacionales e internacionales en estructuración corporativa, contratos comerciales, negociaciones colectivas y cumplimiento normativo laboral dominicano.',
+      whatsapp: '18495550003',
+      emailPublico: 'carlos.mejia@ejemplo.com',
+      ciudad: Ciudad.SANTO_DOMINGO,
+      universidad: 'Universidad Iberoamericana (UNIBE)',
+      anioGraduacion: 2010,
+      exequatur: '34567',
+      verificado: false,
+      plan: Plan.GRATUITO,
+      visitas: 87,
+      especialidades: {
+        connect: [{ slug: 'corporativo' }, { slug: 'laboral' }],
+      },
+    },
+  })
+
+  console.log('✓ Abogados de ejemplo creados')
+  console.log('✅ Seed completado')
+}
+
+main()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect())
