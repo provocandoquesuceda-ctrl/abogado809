@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans text-gray-900 bg-crema;
+  }
+  h1, h2, h3 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-marino text-white px-6 py-3 rounded-lg font-medium hover:bg-marino-light transition-colors duration-200 inline-flex items-center gap-2;
+  }
+  .btn-dorado {
+    @apply bg-dorado text-marino px-6 py-3 rounded-lg font-semibold hover:bg-dorado-dark transition-colors duration-200 inline-flex items-center gap-2;
+  }
+  .btn-outline {
+    @apply border-2 border-marino text-marino px-6 py-3 rounded-lg font-medium hover:bg-marino hover:text-white transition-colors duration-200 inline-flex items-center gap-2;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden;
+  }
+  .badge-verificado {
+    @apply inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-medium px-2 py-1 rounded-full border border-green-200;
+  }
+  .badge-especialidad {
+    @apply inline-block bg-marino/5 text-marino text-xs font-medium px-3 py-1 rounded-full border border-marino/10;
+  }
+  .input-field {
+    @apply w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-marino/30 focus:border-marino transition-colors;
+  }
+}
