@@ -1,0 +1,26 @@
+name: TRACE VERIFY Reuse Experiment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/trace-verify-reuse.mjs"
+      - ".github/workflows/trace-verify-reuse.yml"
+  workflow_dispatch:
+
+jobs:
+  reuse:
+    name: Consume ECO-BRAIN TRACE VERIFY contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Execute reuse test
+        run: node scripts/trace-verify-reuse.mjs
+
+      - name: Upload reuse evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: abogado809-trace-verify-reuse
+          path: evidence/trace-verify-reuse.json
