@@ -5,27 +5,35 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     name: Build, Deploy and Smoke Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
+        id: checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        id: setup
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
+        id: install
         run: npm ci
 
       - name: Build application
+        id: build
         run: npm run build
 
       - name: Start application
+        id: start
         run: |
           npm run start > /tmp/abogado809.log 2>&1 &
           echo $! > /tmp/abogado809.pid
@@ -40,9 +48,11 @@ jobs:
           exit 1
 
       - name: Smoke test local
+        id: smoke_local
         run: node scripts/smoke-test.mjs http://127.0.0.1:3000
 
       - name: Deploy to Vercel
+        id: deploy
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -52,11 +62,13 @@ jobs:
           working-directory: .
 
       - name: Smoke test production
+        id: smoke_production
         env:
           PRODUCTION_URL: https://abogado809.vercel.app
         run: node scripts/smoke-test.mjs "$PRODUCTION_URL"
 
       - name: Operational evidence
+        id: operational_evidence
         if: always()
         run: |
           mkdir -p evidence
@@ -68,6 +80,13 @@ jobs:
             echo "- Repository: $GITHUB_REPOSITORY"
             echo "- Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "- Production URL: https://abogado809.vercel.app"
+            echo "- Pipeline status: ${{ job.status }}"
+            echo "- Install: ${{ steps.install.outcome }}"
+            echo "- Build: ${{ steps.build.outcome }}"
+            echo "- Start: ${{ steps.start.outcome }}"
+            echo "- Local smoke: ${{ steps.smoke_local.outcome }}"
+            echo "- Deploy: ${{ steps.deploy.outcome }}"
+            echo "- Production smoke: ${{ steps.smoke_production.outcome }}"
             echo "- Pipeline: INSTALL -> BUILD -> START -> SMOKE -> DEPLOY -> PRODUCTION SMOKE -> EVIDENCE"
           } > evidence/operational-run.md
 
@@ -77,3 +96,16 @@ jobs:
         with:
           name: abogado809-operational-evidence
           path: evidence/operational-run.md
+
+      - name: Persist operational evidence
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evidence/operational-run.md
+          if git diff --cached --quiet; then
+            echo "No new operational evidence to persist"
+            exit 0
+          fi
+          git commit -m "evidence: record operational run [skip ci]"
+          git push origin HEAD:main
